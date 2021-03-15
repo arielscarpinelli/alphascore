@@ -55,3 +55,25 @@ ol {
   margin-right: 0.5em;
   white-space: pre-wrap;
 }
+
+@media print {
+
+  .App {
+    background-color:  none;
+    color: black;
+  }
+
+  .measure {
+    border-color: black;
+    page-break-inside: avoid;
+  }
+
+  .stave {
+    page-break-inside: avoid;
+  }
+  
+  .fileselect {
+    display: none;
+  }
+
+}

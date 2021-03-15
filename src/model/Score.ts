@@ -1,5 +1,3 @@
-import { notStrictEqual } from "node:assert";
-
 export class Part {
     xml: Element;
 

@@ -74,7 +74,7 @@ class App extends React.Component<{}, AppState> {
   render() {
     return (
       <div className="App">
-        <input type="file" onChange={this.loadFile} />
+        <input type="file" onChange={this.loadFile} className="fileselect"/>
         {this.renderScore()}
         {this.state.error ? <div>{this.state.error}</div> : null}
       </div>
