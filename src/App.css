@@ -34,7 +34,8 @@ ol {
   display: flex;
   flex-direction: column;
   margin-bottom: 2em;
-  margin-right: 2em;
+  padding-left: 1em;
+  padding-right: 1em;
   border-right: 1px solid white;
   position: relative;
 }
@@ -54,6 +55,23 @@ ol {
   list-style-type: none;
   margin-right: 0.5em;
   white-space: pre-wrap;
+}
+
+.repeat {
+  position: absolute;
+  display: flex;
+  justify-content: center;
+  align-content: center;
+  flex-direction: column;
+  height: 100%;
+}
+
+.repeat.forward {
+  left: 0;
+}
+
+.repeat.backward {
+  right: 0;
 }
 
 @media print {

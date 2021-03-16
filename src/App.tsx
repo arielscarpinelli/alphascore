@@ -2,6 +2,7 @@ import React, { ChangeEvent } from 'react';
 import Score, { Part, Measure, INote } from './model/Score';
 import JSZip from 'jszip';
 import './App.css';
+import reportWebVitals from './reportWebVitals';
 
 type AppState = {
   score?: Score
@@ -23,7 +24,7 @@ class App extends React.Component<{}, AppState> {
           const container = await zip.file("META-INF/container.xml")?.async("string");
           const containerDoc = parser.parseFromString(container!, "text/xml");
           const xmlPath = containerDoc.getElementsByTagName("rootfile")[0]?.getAttribute("full-path");
-          musicXmlDom = parser.parseFromString(await zip.file(xmlPath!)!.async("string"), "text/html");
+          musicXmlDom = parser.parseFromString(await zip.file(xmlPath!)!.async("string"), "text/xml");
         } else {
           musicXmlDom = parser.parseFromString(await file.text(), "text/xml")
         }
@@ -61,6 +62,7 @@ class App extends React.Component<{}, AppState> {
     const duration = measure.duration();
     return (<li className="measure" value={measure.number()} key={measure.number()}>
       {((measure.number() % 10) === 0) ? <small className={"measureNumber"}>{measure.number()}</small> : null}
+      {measure.repeat() ? <div className={"repeat " + measure.repeat()!.direction}>:</div> : null}
       {measure.notesAndChordsByStaff().map(staff => <ol className="stave">
         {staff.map(note => this.renderNote(note, duration))}
       </ol>)}

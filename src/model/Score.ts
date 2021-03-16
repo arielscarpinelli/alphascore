@@ -1,23 +1,23 @@
 export class Part {
     xml: Element;
 
-    constructor(xml:Element) {
+    constructor(xml: Element) {
         this.xml = xml;
     }
 
-    measures():Array<Measure> {
+    measures(): Array<Measure> {
         return Array.from(this.xml.getElementsByTagName("measure")).map(xml => new Measure(xml))
     }
 
     id() {
         return this.xml.getAttribute("id")!;
     }
-  }
+}
 
 export class Measure {
     xml: Element;
 
-    constructor(xml:Element) {
+    constructor(xml: Element) {
         this.xml = xml;
     }
 
@@ -33,7 +33,7 @@ export class Measure {
     }
 
     duration() {
-        return this.notesAndChordsByStaff().reduce((max, staff) => 
+        return this.notesAndChordsByStaff().reduce((max, staff) =>
             Math.max(staff.reduce((staffMax, note) => Math.max(note.duration(), staffMax), 0), max), 0);
     }
 
@@ -52,8 +52,8 @@ export class Measure {
                 acc.set(staffIndex, group)
             }
             if (!note.inChord()) {
-                group.push(note) 
-            }  else if (note instanceof Note) {
+                group.push(note)
+            } else if (note instanceof Note) {
                 const previousNote = group[group.length - 1];
                 let chord: Chord;
                 if (!(previousNote instanceof Chord)) {
@@ -70,6 +70,11 @@ export class Measure {
 
         return Array.from(byVoice.values());
     }
+
+    repeat(): { direction: string} | null {
+        const direction = this.xml.getElementsByTagName("barline")[0]?.getElementsByTagName("repeat")[0]?.getAttribute("direction");
+        return direction ? { direction } : null;
+    }
 }
 
 // In MusicXML, notes, chords, rests, etc are "notes"
@@ -79,12 +84,12 @@ export interface INote {
     voice(): string;
     name(): string;
     duration(): number;
-} 
+}
 
 export class Chord implements INote {
     notes: Array<INote>;
 
-    constructor(notes:Array<INote>) {
+    constructor(notes: Array<INote>) {
         this.notes = notes;
     }
 
@@ -113,10 +118,10 @@ export class Chord implements INote {
 abstract class BaseNote implements INote {
     xml: Element;
 
-    constructor(xml:Element) {
+    constructor(xml: Element) {
         this.xml = xml;
     }
-    
+
     abstract name(): string;
 
     staff() {
@@ -141,24 +146,24 @@ interface Pitch {
     alter: string,
     step: string,
     octave: number
-} 
+}
 
 export class Note extends BaseNote {
 
     static steps = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
 
     alter() {
-        return 
+        return
     }
 
-    picth():Pitch {
+    picth(): Pitch {
         const pitch = this.xml.getElementsByTagName("pitch")[0];
         const alterValue = pitch?.getElementsByTagName("alter")[0]?.innerHTML;
         let octave = +pitch?.getElementsByTagName("octave")[0].innerHTML;
         let step = pitch?.getElementsByTagName("step")[0].innerHTML;
         let alter = "";
 
-        switch(alterValue) {
+        switch (alterValue) {
             case '1':
                 alter = "#";
                 break;
@@ -176,8 +181,8 @@ export class Note extends BaseNote {
                 if (step === 'B') {
                     octave--;
                 }
-            }
-        
+        }
+
         return {
             alter,
             step,
@@ -186,7 +191,7 @@ export class Note extends BaseNote {
     }
 
     moveStep(step: string, distance: number) {
-        return Note.steps[(Note.steps.indexOf(step)+distance) % Note.steps.length];
+        return Note.steps[(Note.steps.indexOf(step) + distance) % Note.steps.length];
     }
 
     name() {
@@ -215,7 +220,7 @@ export default class Score {
         this.xml = musicXML;
     }
 
-    static fromMusicXMLDom(xml: Document):Score {
+    static fromMusicXMLDom(xml: Document): Score {
         const score = new Score(xml);
         return score;
     }
@@ -224,7 +229,7 @@ export default class Score {
         return this.xml.getElementsByTagName("work-title")[0]?.innerHTML
     }
 
-    parts():Array<Part> {
+    parts(): Array<Part> {
         // TODO - support score-timewise
         return Array.from(this.xml.getElementsByTagName("part")).map(xml => new Part(xml))
     }
