@@ -215,9 +215,22 @@ export class Note extends BaseNote {
 
     name() {
         const pitch = this.picth();
-        return pitch.step + pitch.alter + pitch.octave;
+        const tie = this.tie();
+        const tieStop = tie?.stop ? "︵" : "";
+        const tieStart = tie?.start ? "︵" : "";
+        return tieStop + (pitch.step + pitch.alter + pitch.octave) + tieStart;
     }
 
+    tie(): {start?: boolean, stop?: boolean} | null {
+        const type = this.xml.getElementsByTagName("tie")[0]?.getAttribute("type")
+        switch(type) {
+            case "start":
+                return { start: true };
+            case "stop":
+                return { stop: true };    
+        }
+        return null;
+    }
 }
 
 export class Rest extends BaseNote {

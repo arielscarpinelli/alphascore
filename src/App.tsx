@@ -1,8 +1,7 @@
 import React, { ChangeEvent } from 'react';
 import Score, { Part, Measure, INote } from './model/Score';
-import JSZip from 'jszip';
 import './App.css';
-import reportWebVitals from './reportWebVitals';
+import unzipAndParse from './util/Zip';
 
 type AppState = {
   score?: Score
@@ -14,23 +13,11 @@ class App extends React.Component<{}, AppState> {
   state: Readonly<AppState> = {}
 
   loadFile = async (event: ChangeEvent<HTMLInputElement>) => {
-    const parser = new DOMParser();
     if (event.target.files) {
       const file = event.target.files[0];
-      let musicXmlDom: Document;
       try {
-        if (file.name.indexOf(".mxl") !== -1) {
-          const zip = await new JSZip().loadAsync(file);
-          const container = await zip.file("META-INF/container.xml")?.async("string");
-          const containerDoc = parser.parseFromString(container!, "text/xml");
-          const xmlPath = containerDoc.getElementsByTagName("rootfile")[0]?.getAttribute("full-path");
-          musicXmlDom = parser.parseFromString(await zip.file(xmlPath!)!.async("string"), "text/xml");
-        } else {
-          musicXmlDom = parser.parseFromString(await file.text(), "text/xml")
-        }
-
         this.setState({
-          score: Score.fromMusicXMLDom(musicXmlDom)
+          score: Score.fromMusicXMLDom(await unzipAndParse(file))
         })
       } catch (e) {
         this.setState({
@@ -64,13 +51,13 @@ class App extends React.Component<{}, AppState> {
       {((measure.number() % 10) === 0) ? <small className={"measureNumber"}>{measure.number()}</small> : null}
       {measure.repeat() ? <div className={"repeat " + measure.repeat()!.direction}>:</div> : null}
       {measure.notesAndChordsByStaff().map(staff => <ol className="stave">
-        {staff.map(note => this.renderNote(note, duration))}
+        {staff.map((note, idx) => this.renderNote(note, idx, duration))}
       </ol>)}
     </li>)
   }
 
-  renderNote(note: INote, measureDuration: number) {
-    return (<li style={{width: (note.duration() / measureDuration * 100) + '%'}}>{note.name().padEnd(3)}</li>)
+  renderNote(note: INote, index: number, measureDuration: number) {
+    return (<li key={index} style={{width: (note.duration() / measureDuration * 100) + '%'}}>{note.name().padEnd(3)}</li>)
   }
 
   render() {

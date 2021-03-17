@@ -54,7 +54,7 @@ ol {
 .measure li {
   list-style-type: none;
   margin-right: 0.5em;
-  white-space: pre-wrap;
+  white-space: pre;
 }
 
 .repeat {
