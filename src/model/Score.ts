@@ -57,12 +57,11 @@ export class Measure {
                 const previousNote = group[group.length - 1];
                 let chord: Chord;
                 if (!(previousNote instanceof Chord)) {
-                    chord = new Chord([previousNote])
-                    group[group.length - 1] = chord;
+                    chord = new Chord([previousNote, note])
                 } else {
-                    chord = previousNote;
+                    chord = new Chord(previousNote.notes.concat([note]));
                 }
-                chord.notes.push(note)
+                group[group.length - 1] = chord;
             };
 
             return acc;
@@ -90,7 +89,7 @@ export class Chord implements INote {
     notes: Array<INote>;
 
     constructor(notes: Array<INote>) {
-        this.notes = notes;
+        this.notes = notes.sort(Note.compare);
     }
 
     staff() {
@@ -145,38 +144,57 @@ abstract class BaseNote implements INote {
 interface Pitch {
     alter: string,
     step: string,
-    octave: number
+    octave: number,
+    alterNumber: number
 }
 
 export class Note extends BaseNote {
 
     static steps = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
 
-    alter() {
-        return
+    static compare(a:INote, b:INote):number {
+        if ((a instanceof Note) && (b instanceof Note)) {
+            const aPitch = a.picth();
+            const bPitch = b.picth();
+
+            const octaveDiff = bPitch.octave - aPitch.octave;
+            const noteDiff = Note.steps.indexOf(bPitch.step) - Note.steps.indexOf(aPitch.step)
+            const alterDiff = bPitch.alterNumber - aPitch.alterNumber;
+
+            if (octaveDiff !== 0) {
+                return octaveDiff;
+            }
+            if (noteDiff !== 0) {
+                return noteDiff;
+            }
+            if (alterDiff !== 0) {
+                return alterDiff;
+            }
+        }
+        return 0;
     }
 
     picth(): Pitch {
         const pitch = this.xml.getElementsByTagName("pitch")[0];
-        const alterValue = pitch?.getElementsByTagName("alter")[0]?.innerHTML;
+        const alterNumber = +pitch?.getElementsByTagName("alter")[0]?.innerHTML;
         let octave = +pitch?.getElementsByTagName("octave")[0].innerHTML;
         let step = pitch?.getElementsByTagName("step")[0].innerHTML;
         let alter = "";
 
-        switch (alterValue) {
-            case '1':
+        switch (alterNumber) {
+            case 1:
                 alter = "#";
                 break;
-            case '-1':
+            case -1:
                 alter = "b";
                 break;
-            case '2':
+            case 2:
                 step = this.moveStep(step, 1);
                 if (step === 'C') {
                     octave++;
                 }
                 break;
-            case '-2':
+            case -2:
                 step = this.moveStep(step, -1);
                 if (step === 'B') {
                     octave--;
@@ -186,7 +204,8 @@ export class Note extends BaseNote {
         return {
             alter,
             step,
-            octave
+            octave,
+            alterNumber
         };
     }
 
