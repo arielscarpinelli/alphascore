@@ -183,10 +183,26 @@ export class Note extends BaseNote {
 
         switch (alterNumber) {
             case 1:
-                alter = "#";
+                if (step === 'E') {
+                    step = 'F'
+                } else if(step === 'B') {
+                    step = 'C'
+                    octave++;
+                } else {
+                    alter = "#";
+                }
                 break;
             case -1:
-                alter = "b";
+                if (step === 'F') {
+                    step = 'E'
+                } else if(step === 'C') {
+                    step = 'B'
+                    octave--;
+                } else {
+                    // TODO: make this configurable, but I like sharps more
+                    step = this.moveStep(step, -1);
+                    alter = "#";
+                }
                 break;
             case 2:
                 step = this.moveStep(step, 1);
@@ -202,19 +218,6 @@ export class Note extends BaseNote {
         }
 
         
-        // TODO: make this configurable, but I like sharps more
-        if (alter === 'b') {
-            step = this.moveStep(step, -1);
-            if (step === 'B') {
-                octave--;
-                alter = ''
-            } else if (step === 'E') {
-                alter = ''
-            } else {
-                alter = '#'
-            }
-        }
-
         return {
             alter,
             step,
