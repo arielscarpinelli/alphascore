@@ -201,6 +201,20 @@ export class Note extends BaseNote {
                 }
         }
 
+        
+        // TODO: make this configurable, but I like sharps more
+        if (alter === 'b') {
+            step = this.moveStep(step, -1);
+            if (step === 'B') {
+                octave--;
+                alter = ''
+            } else if (step === 'E') {
+                alter = ''
+            } else {
+                alter = '#'
+            }
+        }
+
         return {
             alter,
             step,
@@ -210,7 +224,8 @@ export class Note extends BaseNote {
     }
 
     moveStep(step: string, distance: number) {
-        return Note.steps[(Note.steps.indexOf(step) + distance) % Note.steps.length];
+        const moved = (Note.steps.indexOf(step) + distance) % Note.steps.length
+        return Note.steps[moved >= 0 ? moved : (moved + Note.steps.length)];
     }
 
     name() {
